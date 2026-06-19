@@ -1,0 +1,406 @@
+import React, { useState } from 'react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  LineChart, Line 
+} from 'recharts';
+import { 
+  Search, ShieldCheck, BarChart3, Users, Briefcase, Info, 
+  MapPin, CheckCircle2, AlertCircle, Clock, Save, ChevronRight, 
+  Plus, Edit3, Eye, FileText, Phone, Mail, Camera
+} from 'lucide-react';
+
+// --- COLOR PALETTE (TN GOVT SPEC) ---
+const COLORS = {
+  tnBlue: '#003366',
+  tnGreen: '#2D5A27',
+  statusRed: '#DC2626',
+  statusAmber: '#F59E0B',
+  statusGreen: '#16A34A',
+  bgGray: '#F3F4F6'
+};
+
+const VidiyalPlatform = () => {
+  const [role, setRole] = useState('PUBLIC'); // Toggle: PUBLIC | GOVERNMENT
+  const [activeTab, setActiveTab] = useState('NERMAI');
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  // --- MODULE 1: NERMAI (TRANSPARENCY) ---
+  const NermaiView = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Project Transparency Directory</h2>
+        {role === 'GOVERNMENT' && (
+          <button className="bg-[#2D5A27] text-white px-4 py-2 rounded-lg flex items-center gap-2 font-semibold">
+            <Plus size={18} /> Add New Project
+          </button>
+        )}
+      </div>
+
+      {/* SEARCH & FILTER BAR */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[300px] relative">
+          <Search className="absolute left-3 top-2.5 text-slate-400" size={20} />
+          <input className="w-full pl-10 pr-4 py-2 border rounded-lg" placeholder="Search by Project, District, or Contractor..." />
+        </div>
+        <select className="border rounded-lg px-4 py-2 bg-white"><option>All Districts</option></select>
+        <select className="border rounded-lg px-4 py-2 bg-white"><option>All Categories</option></select>
+      </div>
+
+      {/* PROJECT LISTING */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {mockProjects.map(proj => (
+          <div key={proj.id} className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer" onClick={() => setSelectedProject(proj)}>
+            <div className="p-5">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded">{proj.category}</span>
+                <StatusBadge status={proj.status} />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900 leading-tight mb-2">{proj.name}</h3>
+              <div className="flex items-center gap-1 text-slate-500 text-sm mb-4">
+                <MapPin size={14} /> {proj.district} | {proj.constituency}
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs font-bold mb-1">
+                    <span>PROGRESS</span>
+                    <span>{proj.progress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2">
+                    <div className={`h-2 rounded-full ${proj.progress === 100 ? 'bg-green-600' : 'bg-[#003366]'}`} style={{ width: `${proj.progress}%` }}></div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-end border-t pt-3">
+                  <div>
+                    <p className="text-[10px] text-slate-400 uppercase font-bold">Budget</p>
+                    <p className="font-bold text-[#003366]">{proj.budget}</p>
+                  </div>
+                  <button className="text-xs font-bold text-[#003366] flex items-center gap-1">DETAILS <ChevronRight size={14}/></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // --- MODULE 2: PORUPPU (ACCOUNTABILITY) ---
+  const PoruppuView = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-slate-800">Official Accountability Tracker</h2>
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 border-b">
+            <tr>
+              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Responsible Officer</th>
+              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Department</th>
+              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Assigned Projects</th>
+              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Deadline Health</th>
+              <th className="p-4 text-xs font-bold text-slate-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {mockOfficers.map(off => (
+              <tr key={off.id} className="hover:bg-slate-50">
+                <td className="p-4">
+                  <p className="font-bold text-slate-900">{off.name}</p>
+                  <p className="text-xs text-slate-500">{off.designation}</p>
+                </td>
+                <td className="p-4 text-sm text-slate-600">{off.department}</td>
+                <td className="p-4 text-sm font-bold">{off.activeProjects} Active</td>
+                <td className="p-4">
+                  <div className={`flex items-center gap-2 text-xs font-bold ${off.status === 'On Time' ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`w-2 h-2 rounded-full ${off.status === 'On Time' ? 'bg-green-600' : 'bg-red-600'}`}></div>
+                    {off.status}
+                  </div>
+                </td>
+                <td className="p-4">
+                  <button className="text-[#003366] text-xs font-bold hover:underline">View Profile</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // --- MODULE 3: MAKKAL SCORE (PERFORMANCE) ---
+  const MakkalScoreView = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <ScoreCard title="Top District" name="Coimbatore" score="94.2" trend="+2.1%" />
+        <ScoreCard title="Top Department" name="Public Health" score="89.5" trend="+0.4%" />
+        <ScoreCard title="State Avg Efficiency" name="Tamil Nadu" score="82.1" trend="+1.2%" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white p-6 rounded-xl border shadow-sm">
+          <h3 className="font-bold text-slate-800 mb-6 uppercase text-sm tracking-widest">District Performance Ranking</h3>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={perfData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
+                <Tooltip cursor={{fill: '#F1F5F9'}} />
+                <Bar dataKey="score" fill="#003366" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border shadow-sm">
+          <h3 className="font-bold text-slate-800 mb-6 uppercase text-sm tracking-widest">Project Completion Trends</h3>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Line type="monotone" dataKey="completed" stroke="#2D5A27" strokeWidth={3} dot={{r: 6}} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // --- MODULE 4: URIMAI (RIGHTS & BENEFITS) ---
+  const UrimaiView = () => {
+    const [step, setStep] = useState('list'); // 'list' | 'checker' | 'results'
+    
+    return (
+      <div className="space-y-6">
+        <div className="bg-[#003366] rounded-2xl p-8 text-white flex justify-between items-center overflow-hidden relative">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-bold mb-2">Check Your Entitlements</h2>
+            <p className="text-blue-100 mb-6 max-w-md">Answer 5 simple questions to see which Government of Tamil Nadu schemes you qualify for.</p>
+            <button 
+              onClick={() => setStep('checker')}
+              className="bg-white text-[#003366] px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition"
+            >
+              Start Eligibility Checker
+            </button>
+          </div>
+          <FileText size={180} className="absolute -right-10 -bottom-10 text-white/10 rotate-12" />
+        </div>
+
+        {step === 'checker' && (
+          <div className="bg-white border shadow-xl rounded-2xl p-8 max-w-2xl mx-auto">
+            <h3 className="text-xl font-bold mb-6 border-b pb-4">Eligibility Criteria</h3>
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Primary Occupation</label>
+                <select className="w-full border p-3 rounded-lg"><option>Farmer</option><option>Student</option><option>Unemployed</option></select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Annual Income Range</label>
+                  <select className="w-full border p-3 rounded-lg"><option>Under 1.5L</option><option>1.5L - 3L</option></select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Disability Status</label>
+                  <select className="w-full border p-3 rounded-lg"><option>No</option><option>Yes</option></select>
+                </div>
+              </div>
+              <button onClick={() => setStep('results')} className="w-full bg-[#2D5A27] text-white py-4 rounded-xl font-bold text-lg">See Eligible Schemes</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'results' && (
+          <div className="space-y-4">
+             <div className="flex justify-between items-center">
+                <h3 className="font-bold text-xl">Recommended for You</h3>
+                <button onClick={() => setStep('list')} className="text-[#003366] font-bold">Back to Directory</button>
+             </div>
+             <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-green-800 text-sm flex gap-2">
+                <CheckCircle2 size={18} /> Based on your profile, you are eligible for 3 major schemes.
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SchemeCard name="Kalaignar Magalir Urimai Thogai" dept="Social Welfare" benefit="₹1,000 / Month" />
+                <SchemeCard name="Free Power for Farmers" dept="Agriculture" benefit="100% Subsidy" />
+             </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* GOVT BRANDING TOP BAR */}
+      <div className="bg-white border-b px-6 py-2 flex justify-between items-center text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+        <span>Government of Tamil Nadu Official Platform</span>
+        <div className="flex gap-4">
+          <span className="text-green-600">● Live Updates Active</span>
+          <button onClick={() => setRole(role === 'PUBLIC' ? 'GOVERNMENT' : 'PUBLIC')} className="text-[#003366] border-l pl-4 hover:underline">
+            Switch to {role === 'PUBLIC' ? 'Government' : 'Public'} Access
+          </button>
+        </div>
+      </div>
+
+      {/* MAIN NAV */}
+      <nav className="bg-[#003366] text-white px-6 py-4 sticky top-0 z-40 shadow-lg">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="bg-white p-1.5 rounded-lg">
+              <ShieldCheck className="text-[#003366]" size={32} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black tracking-tighter leading-none">VIDIYAL</h1>
+              <p className="text-[10px] opacity-70 font-bold uppercase tracking-widest">Transparency • Accountability • Rights</p>
+            </div>
+          </div>
+          <div className="hidden md:flex gap-1">
+            {['NERMAI', 'PORUPPU', 'MAKKAL SCORE', 'URIMAI'].map(tab => (
+              <button 
+                key={tab} 
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2 rounded-lg text-sm font-bold transition ${activeTab === tab ? 'bg-white/20 text-white' : 'text-blue-100 hover:bg-white/10'}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* CONTENT AREA */}
+      <main className="max-w-7xl mx-auto p-6 md:p-8">
+        {activeTab === 'NERMAI' && <NermaiView />}
+        {activeTab === 'PORUPPU' && <PoruppuView />}
+        {activeTab === 'MAKKAL SCORE' && <MakkalScoreView />}
+        {activeTab === 'URIMAI' && <UrimaiView />}
+      </main>
+
+      {/* PROJECT DETAIL MODAL */}
+      {selectedProject && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-slate-800">{selectedProject.name}</h2>
+              <button onClick={() => setSelectedProject(null)} className="text-slate-400 hover:text-slate-600 font-bold text-2xl">&times;</button>
+            </div>
+            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="bg-slate-100 aspect-video rounded-xl flex items-center justify-center text-slate-400">
+                  <Camera size={48} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase mb-2 tracking-widest">Project Description</h4>
+                  <p className="text-slate-700 leading-relaxed">{selectedProject.description}</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailBox label="Budget" value={selectedProject.budget} />
+                  <DetailBox label="Department" value={selectedProject.department} />
+                  <DetailBox label="Start Date" value={selectedProject.startDate} />
+                  <DetailBox label="Exp. Completion" value={selectedProject.endDate} />
+                </div>
+                <div className="border-t pt-6">
+                  <h4 className="text-sm font-bold text-slate-800 mb-4 uppercase">Responsible Officer (Poruppu)</h4>
+                  <div className="flex items-center gap-4 bg-blue-50 p-4 rounded-xl">
+                    <div className="w-12 h-12 bg-[#003366] rounded-full flex items-center justify-center text-white font-bold">KR</div>
+                    <div>
+                      <p className="font-bold text-slate-900">Er. K. Rajendran</p>
+                      <p className="text-xs text-slate-600">Chief Engineer, PWD</p>
+                      <div className="flex gap-4 mt-2">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#003366]"><Phone size={12}/> 044-2345678</span>
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#003366]"><Mail size={12}/> k.raj@tn.gov.in</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {selectedProject.status === 'Delayed' && (
+                  <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+                    <h4 className="text-xs font-bold text-red-600 uppercase mb-1">Delay Reason</h4>
+                    <p className="text-sm text-red-800">{selectedProject.delayReason}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- HELPER COMPONENTS ---
+const StatusBadge = ({ status }) => {
+  const styles = {
+    'In Progress': 'bg-amber-100 text-amber-700',
+    'Completed': 'bg-green-100 text-green-700',
+    'Delayed': 'bg-red-100 text-red-700',
+    'Not Started': 'bg-slate-100 text-slate-700'
+  };
+  return <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded ${styles[status]}`}>{status}</span>;
+};
+
+const ScoreCard = ({ title, name, score, trend }) => (
+  <div className="bg-white p-6 rounded-xl border shadow-sm">
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{title}</p>
+    <p className="text-xl font-bold text-slate-800 mb-2">{name}</p>
+    <div className="flex items-baseline gap-2">
+      <span className="text-3xl font-black text-[#003366]">{score}</span>
+      <span className="text-xs font-bold text-green-600">{trend}</span>
+    </div>
+  </div>
+);
+
+const DetailBox = ({ label, value }) => (
+  <div>
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+    <p className="text-sm font-bold text-slate-800">{value}</p>
+  </div>
+);
+
+const SchemeCard = ({ name, dept, benefit }) => (
+  <div className="bg-white p-5 rounded-xl border-l-4 border-[#2D5A27] shadow-sm hover:shadow-md transition cursor-pointer">
+    <div className="flex justify-between items-start mb-2">
+      <h4 className="font-bold text-slate-900 leading-tight">{name}</h4>
+      <button className="text-slate-300 hover:text-[#003366]"><Save size={18}/></button>
+    </div>
+    <p className="text-xs text-slate-500 mb-4">{dept}</p>
+    <div className="flex justify-between items-center text-sm">
+      <span className="font-bold text-[#2D5A27]">{benefit}</span>
+      <span className="flex items-center gap-1 font-bold text-[#003366] text-xs">APPLY <ChevronRight size={14}/></span>
+    </div>
+  </div>
+);
+
+// --- MOCK DATA ---
+const mockProjects = [
+  { id: 1, name: "Cauvery Integrated Water Supply Phase III", category: "Water Supply", district: "Salem", constituency: "Mettur", department: "TWAD Board", budget: "₹820.00 Cr", progress: 42, status: "In Progress", description: "Providing sustainable drinking water to 12 rural habitations in Salem district.", startDate: "2023-01-10", endDate: "2025-06-30" },
+  { id: 2, name: "OMR Elevated Corridor (Section 1)", category: "Infrastructure", district: "Chennai", constituency: "Sholinganallur", department: "Highways", budget: "₹1,020.00 Cr", progress: 15, status: "Delayed", delayReason: "Utility shifting (TNEB lines) pending.", description: "Construction of a 4-lane elevated road on OMR to bypass major junctions.", startDate: "2022-11-01", endDate: "2024-12-01" },
+  { id: 3, name: "Madurai Smart City Park & Bio-Center", category: "Parks", district: "Madurai", constituency: "Madurai East", department: "Smart City Corp", budget: "₹45.00 Cr", progress: 100, status: "Completed", description: "Modern urban park with solar powered lighting and zero-waste water recycling.", startDate: "2021-05-15", endDate: "2023-10-10" }
+];
+
+const mockOfficers = [
+  { id: 1, name: "Er. K. Rajendran", designation: "Chief Engineer", department: "Public Works", activeProjects: 12, status: "On Time" },
+  { id: 2, name: "Smt. M. Selvi IAS", designation: "District Collector", department: "Revenue", activeProjects: 45, status: "Overdue" }
+];
+
+const perfData = [
+  { name: 'Coimbatore', score: 94 },
+  { name: 'Chennai', score: 88 },
+  { name: 'Salem', score: 82 },
+  { name: 'Madurai', score: 79 },
+  { name: 'Trichy', score: 75 }
+];
+
+const trendData = [
+  { month: 'Jan', completed: 12 },
+  { month: 'Feb', completed: 18 },
+  { month: 'Mar', completed: 15 },
+  { month: 'Apr', completed: 22 },
+  { month: 'May', completed: 30 }
+];
+
+export default VidiyalPlatform;
